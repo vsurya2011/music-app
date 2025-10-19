@@ -1,30 +1,22 @@
 if (window.location.pathname.includes("room.html")) {
-  const socket = io(); // make sure server is running
+  const socket = io();
   const player = document.getElementById("player");
   const tamilSongs = document.getElementById("tamilSongs");
   const englishSongs = document.getElementById("englishSongs");
-
   const roomCode = localStorage.getItem("roomId");
-  const username = localStorage.getItem("username") || "Guest";
-
-  if (!roomCode) {
-    alert("Room not found! Go back to homepage.");
-    window.location.href = "index.html";
-  }
-
-  document.getElementById("roomCode").innerText = roomCode;
+  document.getElementById("roomCode").innerText = roomCode || "Unknown";
 
   socket.emit("joinRoom", roomCode);
 
   window.changeSong = function(language) {
     let song;
-    if (language === "tamil") song = tamilSongs.value;
-    else if (language === "english") song = englishSongs.value;
+    if(language==='tamil') song = tamilSongs.value;
+    else if(language==='english') song = englishSongs.value;
 
     player.src = song;
     player.currentTime = 0;
     player.play();
-    socket.emit("playSong", { roomId: roomCode, song, time: 0 });
+    socket.emit("playSong", { roomId: roomCode, song, time:0 });
   };
 
   player.onplay = () => {
@@ -36,9 +28,9 @@ if (window.location.pathname.includes("room.html")) {
   };
 
   socket.on("playSong", (data) => {
-    if (data.song && player.src !== data.song) player.src = data.song;
+    if(data.song && player.src !== data.song) player.src = data.song;
     player.currentTime = data.time || 0;
-    player.play().catch(err => console.log("Autoplay blocked:", err));
+    player.play().catch(e=>console.log("Autoplay blocked:",e));
   });
 
   socket.on("pauseSong", () => {
