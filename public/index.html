@@ -2,22 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🎧 Shared Music Room</title>
+  <title>Music Room - Home</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🎵 Shared Music Room</h1>
+  <h2>🎤 Music Room</h2>
 
-  <div class="container">
-    <input id="username" placeholder="Enter your name" />
-    <input id="room" placeholder="Enter room code" />
-
-    <div class="buttons">
-      <button onclick="createRoom()">Create Room</button>
-      <button onclick="joinRoom()">Join Room</button>
-    </div>
+  <div>
+    <label>Username:</label>
+    <input type="text" id="username" placeholder="Enter your name">
   </div>
 
-  <script src="script.js"></script>
+  <div>
+    <label>Room Code:</label>
+    <input type="text" id="room" placeholder="Enter room code">
+  </div>
+
+  <div>
+    <button onclick="createRoom()">Create Room</button>
+    <button onclick="joinRoom()">Join Room</button>
+  </div>
+
+  <script>
+    function createRoom() {
+      const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      document.getElementById("room").value = roomId;
+      joinRoom();
+    }
+
+    function joinRoom() {
+      const roomId = document.getElementById("room").value.trim();
+      const username = document.getElementById("username").value.trim() || "Guest";
+
+      if (!roomId) return alert("Please enter or create a room code!");
+
+      localStorage.setItem("roomId", roomId);
+      localStorage.setItem("username", username);
+
+      // Go to room page
+      window.location.href = "room.html";
+    }
+  </script>
 </body>
 </html>
