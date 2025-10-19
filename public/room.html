@@ -3,33 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <title>Music Room</title>
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.socket.io/4.7.0/socket.io.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Roboto', sans-serif; }
+
+    body {
+      background: url('bg.jpg') no-repeat center center fixed; /* responsive background */
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+      border-radius: 15px;
+      padding: 30px 40px;
+      width: 400px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    h2 { 
+      text-align:center; 
+      margin-bottom: 25px; 
+      font-size:28px; 
+      font-weight:700; 
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.7); 
+    }
+
+    h3 { 
+      margin:15px 0 10px; 
+      font-size:20px; 
+      font-weight:500; 
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #ff6b81;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover { background: #ff4757; }
+
+    audio {
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    @media (max-width: 450px) {
+      .container { width: 95%; padding: 20px; }
+    }
+  </style>
 </head>
 <body>
-  <h2>🎤 Welcome to Room <span id="roomCode"></span></h2>
+  <div class="container">
+    <h2>🎤 Welcome to Room <span id="roomCode"></span></h2>
 
-  <!-- Tamil Songs -->
-  <div>
-    <h3>🎵 Tamil Songs</h3>
-    <select id="tamilSongs">
-      <option value="songs/tamil/song1.mp3">Adaada Adaada</option>
-      <option value="songs/tamil/song2.mp3">Asku Laska</option>
-    </select>
-    <button onclick="changeSong('tamil')">Play Tamil Song</button>
+    <!-- Tamil Songs -->
+    <div>
+      <h3>🎵 Tamil Songs</h3>
+      <select id="tamilSongs">
+        <option value="songs/tamil/song1.mp3">Adaada Adaada</option>
+        <option value="songs/tamil/song2.mp3">Asku Laska</option>
+      </select>
+      <button onclick="changeSong('tamil')">Play Tamil Song</button>
+    </div>
+
+    <!-- English Songs -->
+    <div>
+      <h3>🎶 English Songs</h3>
+      <select id="englishSongs">
+        <option value="songs/english/song1.mp3">Day and Light</option>
+        <option value="songs/english/song2.mp3">English Song 2</option>
+      </select>
+      <button onclick="changeSong('english')">Play English Song</button>
+    </div>
+
+    <audio id="player" controls></audio>
   </div>
-
-  <!-- English Songs -->
-  <div>
-    <h3>🎶 English Songs</h3>
-    <select id="englishSongs">
-      <option value="songs/english/song1.mp3">Day and Light</option>
-      <option value="songs/english/song2.mp3">English Song 2</option>
-    </select>
-    <button onclick="changeSong('english')">Play English Song</button>
-  </div>
-
-  <audio id="player" controls></audio>
 
   <script src="script.js"></script>
 </body>
