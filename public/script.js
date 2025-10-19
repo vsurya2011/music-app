@@ -1,36 +1,25 @@
 // =============================
-// index.html logic
-// =============================
-function createRoom() {
-  const roomId = Math.random().toString(36).substring(2, 8);
-  document.getElementById("room").value = roomId;
-  joinRoom();
-}
-
-function joinRoom() {
-  const roomId = document.getElementById("room").value;
-  const username = document.getElementById("username").value || "Guest";
-  if (!roomId) return alert("Please enter or create a room code!");
-  localStorage.setItem("roomId", roomId);
-  localStorage.setItem("username", username);
-  window.location.href = `room.html`;
-}
-
-// =============================
-// room.html logic
+// room.html logic (synchronized)
 // =============================
 if (window.location.pathname.includes("room.html")) {
   const socket = io();
   const player = document.getElementById("player");
-  const songSelect = document.getElementById("songSelect");
+  const tamilSongs = document.getElementById("tamilSongs");
+  const englishSongs = document.getElementById("englishSongs");
   const roomCode = localStorage.getItem("roomId");
   document.getElementById("roomCode").innerText = roomCode;
 
   socket.emit("joinRoom", roomCode);
 
-  // ✅ When a user changes the song
-  window.changeSong = function () {
-    const song = songSelect.value;
+  // ✅ Function to change song from Tamil or English compartment
+  window.changeSong = function(language) {
+    let song;
+    if (language === "tamil") {
+      song = tamilSongs.value;
+    } else if (language === "english") {
+      song = englishSongs.value;
+    }
+
     player.src = song;
     player.currentTime = 0;
     player.play();
