@@ -1,8 +1,8 @@
 if (window.location.pathname.includes("room.html")) {
   const socket = io(); // make sure server is running
   const player = document.getElementById("player");
-  const tamilSongs = document.getElementById("TamilSongs");
-  const englishSongs = document.getElementById("EnglishSongs");
+  const tamilSongs = document.getElementById("tamilSongs");
+  const englishSongs = document.getElementById("englishSongs");
 
   const roomCode = localStorage.getItem("roomId");
   const username = localStorage.getItem("username") || "Guest";
