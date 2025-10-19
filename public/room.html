@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music Room</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.socket.io/4.7.0/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>🎤 Welcome to Room <span id="roomCode"></span></h2>
+
+  <div>
+    <select id="songSelect">
+      <option value="songs/song1.mp3">Song 1</option>
+      <option value="songs/song2.mp3">Song 2</option>
+      <option value="songs/song2.mp3">Song 2</option>
+    </select>
+    <button onclick="changeSong()">Play Selected</button>
+  </div>
+
+  <audio id="player" controls></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
