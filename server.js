@@ -22,20 +22,31 @@ app.get("/room/:roomId", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "room.html"));
 });
 
+// Store current song & time per room
+const rooms = {}; // { roomId: { song, time } }
+
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   socket.on("joinRoom", (roomId) => {
     socket.join(roomId);
     console.log(`${socket.id} joined room ${roomId}`);
+
+    // Send current state to new user
+    if (rooms[roomId]) {
+      socket.emit("playSong", rooms[roomId]);
+    }
   });
 
   socket.on("playSong", (data) => {
-    socket.to(data.roomId).emit("playSong", data);
+    const { roomId, song, time } = data;
+    rooms[roomId] = { song, time }; // Save room state
+    socket.to(roomId).emit("playSong", { song, time });
   });
 
   socket.on("pauseSong", (data) => {
-    socket.to(data.roomId).emit("pauseSong", data);
+    const { roomId } = data;
+    socket.to(roomId).emit("pauseSong");
   });
 
   socket.on("disconnect", () => {
