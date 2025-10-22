@@ -28,60 +28,21 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
 
-    h2 {
-      text-align:center;
-      margin-bottom: 25px;
-      font-size:28px;
-      font-weight:700;
-      text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
-    }
-
-    h3 {
-      margin:15px 0 10px;
-      font-size:20px;
-      font-weight:500;
-    }
-
-    select {
-      width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 8px;
-      background: #ff6b81;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover { background: #ff4757; }
-
-    audio {
-      width: 100%;
-      margin-top: 20px;
-      border-radius: 8px;
-      outline: none;
-    }
-
-    @media (max-width: 450px) {
-      .container { width: 95%; padding: 20px; }
-    }
+    h2 { text-align:center; margin-bottom: 25px; font-size:28px; font-weight:700; text-shadow: 1px 1px 5px rgba(0,0,0,0.7);}
+    h3 { margin:15px 0 10px; font-size:20px; font-weight:500;}
+    select { width:100%; padding:10px 12px; margin-bottom:10px; border-radius:8px; border:none; font-size:16px;}
+    button { width:100%; padding:12px; margin-bottom:15px; border:none; border-radius:8px; background:#ff6b81; color:#fff; font-size:16px; font-weight:500; cursor:pointer; transition:0.3s;}
+    button:hover { background:#ff4757;}
+    audio { width:100%; margin-top:20px; border-radius:8px; outline:none;}
+    @media (max-width:450px) { .container{width:95%; padding:20px;} }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>🎤 Welcome to Room <span id="roomCode"></span></h2>
+
+    <!-- Start button to unlock audio -->
+    <button id="startBtn">Start Listening</button>
 
     <!-- Tamil Songs -->
     <div>
@@ -97,7 +58,7 @@
     <div>
       <h3>🎶 English Songs</h3>
       <select id="englishSongs">
-        <option value="songs/english/song1.mp3">A thousand years</option>
+       <option value="songs/english/song1.mp3">A thousand years</option>
         <option value="songs/english/song2.mp3">Arcade</option>
         <option value="songs/english/song3.mp3">As it was</option>
         <option value="songs/english/song4.mp3">Ashe Moral of the Story</option>
