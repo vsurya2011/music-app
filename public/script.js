@@ -1,86 +1,74 @@
-// =============================
-// Song Lists
-// =============================
-const tamilSongsList = [
-  "songs/tamil/song1.mp3",
-  "songs/tamil/song2.mp3"
-];
-
-const englishSongsList = Array.from({length: 70}, (_, i) => `songs/english/song${i+1}.mp3`);
-
-// =============================
-// Preload all songs
-// =============================
+const tamilSongsList = ["songs/tamil/song1.mp3","songs/tamil/song2.mp3"];
+const englishSongsList = Array.from({length:70},(_,i)=>`songs/english/song${i+1}.mp3`);
 const preloadedSongs = {};
 
-[...tamilSongsList, ...englishSongsList].forEach(src => {
+[...tamilSongsList, ...englishSongsList].forEach(src=>{
   const audio = new Audio(src);
   audio.preload = "auto";
   preloadedSongs[src] = audio;
 });
 
-// =============================
-// Room logic
-// =============================
 const socket = io();
 const player = document.getElementById("player");
-const roomCode = localStorage.getItem("roomId") || "room1"; // fallback
+const roomCode = localStorage.getItem("roomId") || "room1";
 document.getElementById("roomCode").innerText = roomCode;
 
-// Join room
 socket.emit("joinRoom", roomCode);
 
-// =============================
-// Change song function
-// =============================
-window.changeSong = function(type) {
-  let songSelect = type === "tamil" ? document.getElementById("tamilSongs") : document.getElementById("englishSongs");
-  const songSrc = songSelect.value;
+let isSyncing = false; // prevent emit loops
 
+// Change song
+window.changeSong = function(type){
+  const songSelect = type==="tamil"?document.getElementById("tamilSongs"):document.getElementById("englishSongs");
+  const songSrc = songSelect.value;
   const audio = preloadedSongs[songSrc];
-  if (audio) {
+  if(audio){
     player.src = audio.src;
     player.currentTime = 0;
     player.play();
   }
-
-  socket.emit("playSong", { roomId: roomCode, song: songSrc, time: 0 });
+  socket.emit("playSong",{roomId:roomCode,song:songSrc,time:0});
 };
 
-// =============================
-// Sync play/pause
-// =============================
-// Prevent emit loop
-player.dataset.isSyncing = false;
-
-player.onplay = () => {
-  if (!player.dataset.isSyncing) {
-    const relativePath = Object.keys(preloadedSongs).find(key => preloadedSongs[key].src === player.src);
-    socket.emit("playSong", { roomId: roomCode, song: relativePath, time: player.currentTime });
+// Emit play/pause manually
+player.onplay = ()=>{
+  if(!isSyncing){
+    const song = Object.keys(preloadedSongs).find(key=>preloadedSongs[key].src===player.src);
+    socket.emit("playSong",{roomId:roomCode,song,time:player.currentTime});
   }
 };
 
-player.onpause = () => {
-  if (!player.dataset.isSyncing) {
-    socket.emit("pauseSong", { roomId: roomCode });
+player.onpause = ()=>{
+  if(!isSyncing){
+    socket.emit("pauseSong",{roomId:roomCode});
   }
 };
 
-// =============================
-// Receive sync events
-// =============================
-socket.on("playSong", (data) => {
-  if (data.song && player.src !== preloadedSongs[data.song].src) {
-    player.src = preloadedSongs[data.song].src;
+// Receive events
+socket.on("playSong",data=>{
+  const audioSrc = preloadedSongs[data.song]?.src;
+  if(audioSrc && player.src!==audioSrc){
+    player.src = audioSrc;
   }
-  player.dataset.isSyncing = true;
+  isSyncing = true;
   player.currentTime = data.time || 0;
-  player.play().catch(err => console.log("Autoplay blocked:", err))
-        .finally(() => { player.dataset.isSyncing = false });
+  player.play().catch(()=>{}).finally(()=>{isSyncing=false;});
 });
 
-socket.on("pauseSong", () => {
-  player.dataset.isSyncing = true;
+socket.on("pauseSong",()=>{
+  isSyncing=true;
   player.pause();
-  player.dataset.isSyncing = false;
+  isSyncing=false;
 });
+
+// ==============================
+// Optional: real-time sync every second
+// ==============================
+setInterval(()=>{
+  if(!isSyncing && !player.paused){
+    const song = Object.keys(preloadedSongs).find(key=>preloadedSongs[key].src===player.src);
+    if(song){
+      socket.emit("playSong",{roomId:roomCode,song,time:player.currentTime});
+    }
+  }
+},1000);
