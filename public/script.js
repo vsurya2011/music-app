@@ -1,28 +1,19 @@
 // =============================
-// Preload all songs
+// Song Lists
 // =============================
 const tamilSongsList = [
   "songs/tamil/song1.mp3",
   "songs/tamil/song2.mp3"
 ];
 
-const englishSongsList = [
-  "songs/english/song1.mp3",
-  "songs/english/song2.mp3"
-];
+const englishSongsList = Array.from({length: 70}, (_, i) => `songs/english/song${i+1}.mp3`);
 
-// Object to store preloaded Audio objects
+// =============================
+// Preload all songs
+// =============================
 const preloadedSongs = {};
 
-// Preload Tamil songs
-tamilSongsList.forEach(src => {
-  const audio = new Audio(src);
-  audio.preload = "auto";
-  preloadedSongs[src] = audio;
-});
-
-// Preload English songs
-englishSongsList.forEach(src => {
+[...tamilSongsList, ...englishSongsList].forEach(src => {
   const audio = new Audio(src);
   audio.preload = "auto";
   preloadedSongs[src] = audio;
@@ -31,53 +22,65 @@ englishSongsList.forEach(src => {
 // =============================
 // Room logic
 // =============================
-if (window.location.pathname.includes("room.html")) {
-  const socket = io();
-  const player = document.getElementById("player");
-  const roomCode = localStorage.getItem("roomId");
-  document.getElementById("roomCode").innerText = roomCode;
+const socket = io();
+const player = document.getElementById("player");
+const roomCode = localStorage.getItem("roomId") || "room1"; // fallback
+document.getElementById("roomCode").innerText = roomCode;
 
-  socket.emit("joinRoom", roomCode);
+// Join room
+socket.emit("joinRoom", roomCode);
 
-  // Change song based on type
-  window.changeSong = function(type) {
-    let songSelect, songSrc;
-    if (type === "tamil") {
-      songSelect = document.getElementById("tamilSongs");
-    } else {
-      songSelect = document.getElementById("englishSongs");
-    }
-    songSrc = songSelect.value;
+// =============================
+// Change song function
+// =============================
+window.changeSong = function(type) {
+  let songSelect = type === "tamil" ? document.getElementById("tamilSongs") : document.getElementById("englishSongs");
+  const songSrc = songSelect.value;
 
-    // Use preloaded audio
-    const audio = preloadedSongs[songSrc];
-    if (audio) {
-      player.src = audio.src;
-      player.currentTime = 0;
-      player.play();
-    }
+  const audio = preloadedSongs[songSrc];
+  if (audio) {
+    player.src = audio.src;
+    player.currentTime = 0;
+    player.play();
+  }
 
-    // Emit to other users
-    socket.emit("playSong", { roomId: roomCode, song: songSrc, time: 0 });
-  };
+  socket.emit("playSong", { roomId: roomCode, song: songSrc, time: 0 });
+};
 
-  // Emit play/pause to others
-  player.onplay = () => {
-    socket.emit("playSong", { roomId: roomCode, song: player.src, time: player.currentTime });
-  };
-  player.onpause = () => {
+// =============================
+// Sync play/pause
+// =============================
+// Prevent emit loop
+player.dataset.isSyncing = false;
+
+player.onplay = () => {
+  if (!player.dataset.isSyncing) {
+    const relativePath = Object.keys(preloadedSongs).find(key => preloadedSongs[key].src === player.src);
+    socket.emit("playSong", { roomId: roomCode, song: relativePath, time: player.currentTime });
+  }
+};
+
+player.onpause = () => {
+  if (!player.dataset.isSyncing) {
     socket.emit("pauseSong", { roomId: roomCode });
-  };
+  }
+};
 
-  // Receive play/pause from others
-  socket.on("playSong", (data) => {
-    if (data.song && player.src !== data.song) {
-      player.src = data.song;
-    }
-    player.currentTime = data.time || 0;
-    player.play().catch(err => console.log("Autoplay blocked:", err));
-  });
-  socket.on("pauseSong", () => {
-    player.pause();
-  });
-}
+// =============================
+// Receive sync events
+// =============================
+socket.on("playSong", (data) => {
+  if (data.song && player.src !== preloadedSongs[data.song].src) {
+    player.src = preloadedSongs[data.song].src;
+  }
+  player.dataset.isSyncing = true;
+  player.currentTime = data.time || 0;
+  player.play().catch(err => console.log("Autoplay blocked:", err))
+        .finally(() => { player.dataset.isSyncing = false });
+});
+
+socket.on("pauseSong", () => {
+  player.dataset.isSyncing = true;
+  player.pause();
+  player.dataset.isSyncing = false;
+});
