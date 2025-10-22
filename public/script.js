@@ -15,7 +15,7 @@ document.getElementById("roomCode").innerText = roomCode;
 
 socket.emit("joinRoom", roomCode);
 
-let isSyncing = false; // prevent emit loops
+let isSyncing = false;
 
 // Change song
 window.changeSong = function(type){
@@ -30,7 +30,7 @@ window.changeSong = function(type){
   socket.emit("playSong",{roomId:roomCode,song:songSrc,time:0});
 };
 
-// Emit play/pause manually
+// Play/pause events
 player.onplay = ()=>{
   if(!isSyncing){
     const song = Object.keys(preloadedSongs).find(key=>preloadedSongs[key].src===player.src);
@@ -44,7 +44,7 @@ player.onpause = ()=>{
   }
 };
 
-// Receive events
+// Receive play/pause
 socket.on("playSong",data=>{
   const audioSrc = preloadedSongs[data.song]?.src;
   if(audioSrc && player.src!==audioSrc){
@@ -61,14 +61,15 @@ socket.on("pauseSong",()=>{
   isSyncing=false;
 });
 
-// ==============================
-// Optional: real-time sync every second
-// ==============================
-setInterval(()=>{
-  if(!isSyncing && !player.paused){
-    const song = Object.keys(preloadedSongs).find(key=>preloadedSongs[key].src===player.src);
-    if(song){
-      socket.emit("playSong",{roomId:roomCode,song,time:player.currentTime});
-    }
+// Receive real-time timestamp updates
+socket.on("syncTime",data=>{
+  const audioSrc = preloadedSongs[data.song]?.src;
+  if(audioSrc && player.src!==audioSrc){
+    player.src = audioSrc;
   }
-},1000);
+  if(!player.paused){
+    isSyncing=true;
+    player.currentTime = data.time;
+    isSyncing=false;
+  }
+});
